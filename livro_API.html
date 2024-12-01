@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <label for="livro">Nome do livro:</label>
+  <input type="text" id="livro" placeholder="Digite o nome do livro">
+  <button onclick="buscarLivro()">Buscar</button>
+
+  <div id="resultado">
+    <h2>Título:</h2>
+    <p id="titulo"></p>
+    <h2>Autor:</h2>
+    <p id="autor"></p>
+    <h2>Descrição:</h2>
+    <p id="descricao"></p>
+    <h2>Imagem:</h2>
+    <img id="imagem" src="" alt="Imagem do livro">
+  </div>
+
+  <script>
+    function buscarLivro() {
+      const nomeLivro = document.getElementById("livro").value;
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${nomeLivro}`;
+
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+         
+         const livro = data.items[0]; // Pega o primeiro resultado
+	 console.log(livro);
+
+          if (livro) { //verifica se o livro existe
+            const titulo = livro.volumeInfo.title;
+            const autor = livro.volumeInfo.authors ? livro.volumeInfo.authors[0] : 'Autor desconhecido';
+            const descricao = livro.volumeInfo.description || 'Descrição não disponível';
+            const imagem = livro.volumeInfo.imageLinks ? livro.volumeInfo.imageLinks.thumbnail : "";
+
+            document.getElementById("titulo").textContent = titulo;
+            document.getElementById("autor").textContent = autor;
+            document.getElementById("descricao").textContent = descricao;
+            document.getElementById("imagem").src = imagem;
+          } else {
+            alert('Livro não encontrado.');
+          }
+        })
+        .catch((error) => {
+          console.error('Ocorreu um erro ao buscar o livro:', error);
+        });
+    }
+  </script>
+</body>
+</html>

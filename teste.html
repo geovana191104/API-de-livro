@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Livros no Google Books</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #livro {
+      width: 300px;
+      padding: 8px;
+    }
+
+    #buscar {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    #livros-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .livro-card {
+      width: 300px;
+      margin: 10px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .livro-card img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .descricao {
+      max-height: 3em; /* 3 linhas */
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .saiba-mais,
+    .saiba-menos {
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+      display: block; /* Mostrar por padrão */
+    }
+
+    .saiba-menos {
+      display: none; /* Ocultar inicialmente */
+    }
+  </style>
+</head>
+<body>
+  <h1>Consulta de Livros no Google Books</h1>
+
+  <label for="livro">Nome do livro:</label>
+  <input type="text" id="livro" placeholder="Digite o nome do livro">
+  <button onclick="buscarLivros()">Buscar</button>
+
+  <div id="livros-container"></div>
+
+  <script>
+    function buscarLivros() {
+      const nomeLivro = document.getElementById("livro").value;
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${nomeLivro}`;
+
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          const livros = data.items || [];
+
+          const livrosContainer = document.getElementById("livros-container");
+          livrosContainer.innerHTML = '';
+
+          livros.forEach((livro) => {
+            const titulo = livro.volumeInfo.title;
+            const autor = livro.volumeInfo.authors ? livro.volumeInfo.authors.join(', ') : 'Autor desconhecido';
+            const descricao = livro.volumeInfo.description || 'Descrição não disponível';
+            const imagem = livro.volumeInfo.imageLinks ? livro.volumeInfo.imageLinks.thumbnail : '';
+
+            const livroCard = document.createElement("div"); //coloca todos os elementos div dentro de uma variavel
+            livroCard.classList.add("livro-card"); //adiciona essa variavel a lista 
+
+            <!-- CRIANDO ELEMENTOA EM TEMPO DE EXECUÇÂO --> //cria todos os elementos de livro em tempo real
+            const descricaoHTML = `
+              <p class="descricao">${descricao}</p> 
+              <p class="saiba-mais" onclick="expandirDescricao(this)">Saiba Mais</p> 
+              <p class="saiba-menos" onclick="recolherDescricao(this)">Saiba Menos</p>
+            `; //item de expandir e diminuir 
+
+            livroCard.innerHTML = ` 
+              <h2>${titulo}</h2>
+              <p>Autor: ${autor}</p>
+              <img src="${imagem}" alt="${titulo}">
+              ${descricaoHTML}
+            `;//insere as informações no arquivo HTML 
+
+            livrosContainer.appendChild(livroCard);
+          }); //para sempre adicionar os livros no container
+        })
+        .catch((error) => {
+          console.error('Ocorreu um erro ao buscar os livros:', error);
+        }); //mostrar que ocorreu um erro ao tentar achar o livro
+    }
+
+    function expandirDescricao(element) { //para aumentar o saiba mais com a descrição do livro
+      const descricaoElement = element.previousElementSibling;
+      const saibaMenosElement = element.nextElementSibling;
+      descricaoElement.style.maxHeight = 'none';
+      element.style.display = 'none';
+      saibaMenosElement.style.display = 'block';
+    }
+
+    function recolherDescricao(element) { //para diminuir o saiba mais com a descrição do livro
+      const descricaoElement = element.previousElementSibling.previousElementSibling;
+      const saibaMaisElement = element.previousElementSibling;
+      descricaoElement.style.maxHeight = '3em';
+      saibaMaisElement.style.display = 'block';
+      element.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
